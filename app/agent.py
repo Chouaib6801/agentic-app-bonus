@@ -11,9 +11,9 @@ import os
 import json
 from typing import Optional
 
-# Load .env file automatically
+# Load .env file automatically (override=True to prioritize .env over system env vars)
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
 from openai import OpenAI
 

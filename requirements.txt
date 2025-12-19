@@ -4,7 +4,7 @@ uvicorn[standard]==0.27.0
 python-multipart==0.0.6
 
 # OpenAI SDK
-openai==1.12.0
+openai>=1.12.0
 
 # Redis Queue
 redis==5.0.1

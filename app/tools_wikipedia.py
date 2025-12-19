@@ -14,6 +14,18 @@ from typing import Optional
 # Wikipedia API base URL
 WIKI_API_URL = "https://en.wikipedia.org/w/api.php"
 
+# User-Agent required by Wikipedia API (https://meta.wikimedia.org/wiki/User-Agent_policy)
+USER_AGENT = "AgenticResearchAssistant/1.0 (https://github.com/Chouaib6801/agentic-app-bonus)"
+
+
+def _make_request(url: str) -> dict | list | None:
+    """Make a request to Wikipedia API with proper headers."""
+    request = urllib.request.Request(url)
+    request.add_header("User-Agent", USER_AGENT)
+    
+    with urllib.request.urlopen(request, timeout=10) as response:
+        return json.loads(response.read().decode("utf-8"))
+
 
 def wikipedia_search(query: str, limit: int = 5) -> list[str]:
     """
@@ -37,12 +49,11 @@ def wikipedia_search(query: str, limit: int = 5) -> list[str]:
     url = f"{WIKI_API_URL}?{urllib.parse.urlencode(params)}"
     
     try:
-        with urllib.request.urlopen(url, timeout=10) as response:
-            data = json.loads(response.read().decode("utf-8"))
-            # OpenSearch returns [query, [titles], [descriptions], [urls]]
-            if len(data) >= 2:
-                return data[1]
-            return []
+        data = _make_request(url)
+        # OpenSearch returns [query, [titles], [descriptions], [urls]]
+        if data and len(data) >= 2:
+            return data[1]
+        return []
     except Exception as e:
         print(f"Wikipedia search error: {e}")
         return []
@@ -72,15 +83,16 @@ def wikipedia_summary(title: str, sentences: int = 5) -> Optional[str]:
     url = f"{WIKI_API_URL}?{urllib.parse.urlencode(params)}"
     
     try:
-        with urllib.request.urlopen(url, timeout=10) as response:
-            data = json.loads(response.read().decode("utf-8"))
-            pages = data.get("query", {}).get("pages", {})
-            
-            for page_id, page_data in pages.items():
-                if page_id != "-1":  # -1 means page not found
-                    return page_data.get("extract", "")
-            
+        data = _make_request(url)
+        if not data:
             return None
+        pages = data.get("query", {}).get("pages", {})
+        
+        for page_id, page_data in pages.items():
+            if page_id != "-1":  # -1 means page not found
+                return page_data.get("extract", "")
+        
+        return None
     except Exception as e:
         print(f"Wikipedia summary error: {e}")
         return None
