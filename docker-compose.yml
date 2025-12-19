@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Redis for job queue
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # FastAPI application
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - REDIS_URL=redis://redis:6379
+      - DATA_DIR=/app/data
+    volumes:
+      - job_data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+  # RQ Worker for background jobs
+  worker:
+    build: .
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - REDIS_URL=redis://redis:6379
+      - DATA_DIR=/app/data
+    volumes:
+      - job_data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: python -m app.worker
+
+volumes:
+  redis_data:
+  job_data:
+

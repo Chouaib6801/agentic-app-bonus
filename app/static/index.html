@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Research Assistant</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        input[type="file"] {
+            padding: 10px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .status-panel {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .status-panel.visible {
+            display: block;
+        }
+        
+        .status {
+            padding: 8px 16px;
+            border-radius: 4px;
+            display: inline-block;
+            font-weight: 600;
+        }
+        
+        .status.queued { background: #f39c12; color: white; }
+        .status.started { background: #3498db; color: white; }
+        .status.finished { background: #27ae60; color: white; }
+        .status.failed { background: #e74c3c; color: white; }
+        
+        .files-list {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        
+        .files-list a {
+            display: inline-block;
+            margin: 5px 10px 5px 0;
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        
+        .files-list a:hover {
+            background: #2980b9;
+        }
+        
+        .error-message {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fadbd8;
+            border: 1px solid #e74c3c;
+            border-radius: 4px;
+            color: #c0392b;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Agentic Research Assistant</h1>
+    <p>Enter a research topic or question. The agent will search Wikipedia and generate a comprehensive report.</p>
+    
+    <form id="jobForm">
+        <div class="form-group">
+            <label for="prompt">Research Prompt (required)</label>
+            <textarea 
+                id="prompt" 
+                name="prompt" 
+                rows="3" 
+                placeholder="e.g., What are the main causes and effects of climate change?"
+                required
+            ></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="image">Image (optional)</label>
+            <input type="file" id="image" name="image" accept="image/png,image/jpeg,image/webp">
+            <p class="help-text">Upload an image to include in the analysis (PNG, JPG, or WebP)</p>
+        </div>
+        
+        <div class="form-group">
+            <label for="context_text">Large Context (optional)</label>
+            <textarea 
+                id="context_text" 
+                name="context_text" 
+                rows="6" 
+                placeholder="Paste any additional context or large text here..."
+            ></textarea>
+            <p class="help-text">Large texts will be automatically chunked and summarized</p>
+        </div>
+        
+        <button type="submit" id="submitBtn">Run Research</button>
+    </form>
+    
+    <div id="statusPanel" class="status-panel">
+        <h3>Job Status</h3>
+        <p><strong>Job ID:</strong> <span id="jobId"></span></p>
+        <p><strong>Status:</strong> <span id="jobStatus" class="status"></span><span id="spinner" class="spinner" style="display:none;"></span></p>
+        <div id="errorContainer" style="display:none;">
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+        <div id="filesContainer" class="files-list" style="display:none;">
+            <strong>Download Files:</strong>
+            <div id="fileLinks"></div>
+        </div>
+        <button id="checkStatusBtn" onclick="checkStatus()" style="margin-top: 15px;">Refresh Status</button>
+    </div>
+    
+    <script>
+        let currentJobId = null;
+        let statusInterval = null;
+        
+        document.getElementById('jobForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            const formData = new FormData();
+            formData.append('prompt', document.getElementById('prompt').value);
+            
+            const imageFile = document.getElementById('image').files[0];
+            if (imageFile) {
+                formData.append('image', imageFile);
+            }
+            
+            const contextText = document.getElementById('context_text').value;
+            if (contextText) {
+                formData.append('context_text', contextText);
+            }
+            
+            try {
+                const response = await fetch('/jobs', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                currentJobId = data.job_id;
+                
+                // Show status panel
+                document.getElementById('statusPanel').classList.add('visible');
+                document.getElementById('jobId').textContent = currentJobId;
+                document.getElementById('jobStatus').textContent = 'queued';
+                document.getElementById('jobStatus').className = 'status queued';
+                document.getElementById('spinner').style.display = 'inline-block';
+                document.getElementById('errorContainer').style.display = 'none';
+                document.getElementById('filesContainer').style.display = 'none';
+                
+                // Start polling for status
+                startStatusPolling();
+                
+            } catch (error) {
+                alert('Error submitting job: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Run Research';
+            }
+        });
+        
+        async function checkStatus() {
+            if (!currentJobId) return;
+            
+            try {
+                const response = await fetch(`/jobs/${currentJobId}`);
+                const data = await response.json();
+                
+                document.getElementById('jobStatus').textContent = data.status;
+                document.getElementById('jobStatus').className = 'status ' + data.status;
+                
+                if (data.status === 'finished') {
+                    document.getElementById('spinner').style.display = 'none';
+                    stopStatusPolling();
+                    
+                    if (data.files && data.download_urls) {
+                        const fileLinks = document.getElementById('fileLinks');
+                        fileLinks.innerHTML = '';
+                        data.files.forEach(file => {
+                            const link = document.createElement('a');
+                            link.href = data.download_urls[file];
+                            link.textContent = file;
+                            link.target = '_blank';
+                            fileLinks.appendChild(link);
+                        });
+                        document.getElementById('filesContainer').style.display = 'block';
+                    }
+                } else if (data.status === 'failed') {
+                    document.getElementById('spinner').style.display = 'none';
+                    stopStatusPolling();
+                    
+                    if (data.error) {
+                        document.getElementById('errorMessage').textContent = data.error;
+                        document.getElementById('errorContainer').style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+            }
+        }
+        
+        function startStatusPolling() {
+            stopStatusPolling();
+            statusInterval = setInterval(checkStatus, 2000);
+        }
+        
+        function stopStatusPolling() {
+            if (statusInterval) {
+                clearInterval(statusInterval);
+                statusInterval = null;
+            }
+        }
+    </script>
+</body>
+</html>
+
