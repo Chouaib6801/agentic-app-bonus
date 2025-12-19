@@ -4,220 +4,815 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agentic Research Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a24;
+            --bg-hover: #22222e;
+            --border-color: #2a2a3a;
+            --border-focus: #6366f1;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #6366f1;
+            --accent-secondary: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --success: #22c55e;
+            --success-bg: rgba(34, 197, 94, 0.1);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245, 158, 11, 0.1);
+            --error: #ef4444;
+            --error-bg: rgba(239, 68, 68, 0.1);
+            --gradient-1: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+            --gradient-2: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+        }
+
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            max-width: 800px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Background effects */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15), transparent),
+                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(139, 92, 246, 0.1), transparent),
+                radial-gradient(ellipse 40% 30% at 0% 100%, rgba(14, 165, 233, 0.08), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 900px;
             margin: 0 auto;
-            padding: 20px;
-            background: #f5f5f5;
-            color: #333;
+            padding: 40px 24px;
+            position: relative;
+            z-index: 1;
         }
-        
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-1);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+
         h1 {
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+            font-size: 32px;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Main card */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.6s ease-out;
+            animation-delay: 0.1s;
+            animation-fill-mode: both;
+        }
+
+        /* Form elements */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
-        
+
         label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 10px;
         }
-        
+
+        label .icon {
+            font-size: 16px;
+        }
+
+        .label-optional {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
         textarea {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
             font-family: inherit;
-            font-size: 14px;
+            font-size: 15px;
             resize: vertical;
+            transition: all 0.2s ease;
         }
-        
+
         textarea:focus {
             outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px var(--accent-glow);
         }
-        
-        input[type="file"] {
-            padding: 10px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 100%;
+
+        textarea::placeholder {
+            color: var(--text-muted);
         }
-        
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 4px;
-            font-size: 16px;
+
+        .textarea-main {
+            min-height: 120px;
+        }
+
+        .textarea-context {
+            min-height: 100px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+
+        /* File upload */
+        .file-upload {
+            position: relative;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
         }
-        
-        button:hover {
-            background: #2980b9;
+
+        .file-input-wrapper:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-hover);
         }
-        
-        button:disabled {
-            background: #95a5a6;
+
+        .file-input-wrapper.has-file {
+            border-style: solid;
+            border-color: var(--success);
+            background: var(--success-bg);
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .file-text {
+            flex: 1;
+        }
+
+        .file-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .file-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .file-name {
+            color: var(--success);
+            font-weight: 500;
+        }
+
+        /* Submit button */
+        .btn-submit {
+            width: 100%;
+            padding: 16px 24px;
+            background: var(--gradient-1);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-submit:hover::before {
+            opacity: 1;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
         }
-        
+
+        .btn-submit .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Status panel */
         .status-panel {
-            margin-top: 30px;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 32px;
             display: none;
+            animation: fadeInUp 0.4s ease-out;
         }
-        
+
         .status-panel.visible {
             display: block;
         }
-        
-        .status {
-            padding: 8px 16px;
-            border-radius: 4px;
-            display: inline-block;
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .status-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-title h3 {
+            font-size: 18px;
             font-weight: 600;
         }
-        
-        .status.queued { background: #f39c12; color: white; }
-        .status.started { background: #3498db; color: white; }
-        .status.finished { background: #27ae60; color: white; }
-        .status.failed { background: #e74c3c; color: white; }
-        
-        .files-list {
-            margin-top: 15px;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 4px;
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        
-        .files-list a {
-            display: inline-block;
-            margin: 5px 10px 5px 0;
-            padding: 8px 16px;
-            background: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
+
+        .status-badge.queued {
+            background: var(--warning-bg);
+            color: var(--warning);
         }
-        
-        .files-list a:hover {
-            background: #2980b9;
+
+        .status-badge.started {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent-secondary);
         }
-        
-        .error-message {
-            margin-top: 10px;
-            padding: 10px;
-            background: #fadbd8;
-            border: 1px solid #e74c3c;
-            border-radius: 4px;
-            color: #c0392b;
+
+        .status-badge.finished {
+            background: var(--success-bg);
+            color: var(--success);
         }
-        
-        .help-text {
-            font-size: 12px;
-            color: #7f8c8d;
-            margin-top: 5px;
+
+        .status-badge.failed {
+            background: var(--error-bg);
+            color: var(--error);
         }
-        
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #3498db;
+
+        .status-badge .dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
-            vertical-align: middle;
+            background: currentColor;
         }
-        
+
+        .status-badge.started .dot,
+        .status-badge.queued .dot {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .job-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+            background: var(--bg-tertiary);
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        /* Progress steps */
+        .progress-steps {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .progress-step {
+            flex: 1;
+            height: 4px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-step.active {
+            background: var(--accent-primary);
+        }
+
+        .progress-step.completed {
+            background: var(--success);
+        }
+
+        .progress-step .fill {
+            height: 100%;
+            background: var(--accent-primary);
+            border-radius: 2px;
+            animation: progressPulse 1.5s ease-in-out infinite;
+        }
+
+        /* Files grid */
+        .files-section {
+            margin-top: 24px;
+        }
+
+        .files-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .file-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .file-card:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-hover);
+            transform: translateY(-2px);
+        }
+
+        .file-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .file-card-icon.md {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent-primary);
+        }
+
+        .file-card-icon.pdf {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .file-card-icon.json {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .file-card-info h4 {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .file-card-info span {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Error message */
+        .error-box {
+            background: var(--error-bg);
+            border: 1px solid var(--error);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .error-box.visible {
+            display: block;
+        }
+
+        .error-box-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--error);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .error-box-content {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* Refresh button */
+        .btn-refresh {
+            padding: 10px 20px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-refresh:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-primary);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 32px 0;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        footer a {
+            color: var(--accent-secondary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        @keyframes progressPulse {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px 16px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .card {
+                padding: 24px;
+                border-radius: 16px;
+            }
+
+            .status-header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+
+            .files-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
         }
     </style>
 </head>
 <body>
-    <h1>🔍 Agentic Research Assistant</h1>
-    <p>Enter a research topic or question. The agent will search Wikipedia and generate a comprehensive report.</p>
+    <div class="bg-gradient"></div>
     
-    <form id="jobForm">
-        <div class="form-group">
-            <label for="prompt">Research Prompt (required)</label>
-            <textarea 
-                id="prompt" 
-                name="prompt" 
-                rows="3" 
-                placeholder="e.g., What are the main causes and effects of climate change?"
-                required
-            ></textarea>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🔍</div>
+                <h1>Agentic Research</h1>
+            </div>
+            <p class="subtitle">AI-powered research assistant that searches Wikipedia and generates comprehensive reports</p>
+        </header>
+
+        <form id="jobForm" class="card">
+            <div class="form-group">
+                <label>
+                    <span class="icon">✨</span>
+                    Research Prompt
+                </label>
+                <textarea 
+                    id="prompt" 
+                    name="prompt" 
+                    class="textarea-main"
+                    placeholder="What would you like to research? e.g., 'Explain the causes and effects of climate change' or 'History of artificial intelligence'"
+                    required
+                ></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <span class="icon">🖼️</span>
+                    Image
+                    <span class="label-optional">Optional</span>
+                </label>
+                <div class="file-upload">
+                    <div class="file-input-wrapper" id="fileWrapper">
+                        <input type="file" id="image" name="image" accept="image/png,image/jpeg,image/webp">
+                        <div class="file-icon">📁</div>
+                        <div class="file-text">
+                            <div class="file-title" id="fileTitle">Drop an image or click to browse</div>
+                            <div class="file-subtitle" id="fileSubtitle">PNG, JPG or WebP • Max 10MB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <span class="icon">📄</span>
+                    Additional Context
+                    <span class="label-optional">Optional • Large texts auto-summarized</span>
+                </label>
+                <textarea 
+                    id="context_text" 
+                    name="context_text" 
+                    class="textarea-context"
+                    placeholder="Paste any additional context, documents, or background information here..."
+                ></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <span id="btnText">Start Research</span>
+                <span id="btnIcon">→</span>
+            </button>
+        </form>
+
+        <div id="statusPanel" class="status-panel">
+            <div class="status-header">
+                <div class="status-title">
+                    <h3>Research Job</h3>
+                    <span id="statusBadge" class="status-badge queued">
+                        <span class="dot"></span>
+                        <span id="statusText">Queued</span>
+                    </span>
+                </div>
+                <code class="job-id" id="jobIdDisplay"></code>
+            </div>
+
+            <div class="progress-steps" id="progressSteps">
+                <div class="progress-step" id="step1"></div>
+                <div class="progress-step" id="step2"></div>
+                <div class="progress-step" id="step3"></div>
+                <div class="progress-step" id="step4"></div>
+            </div>
+
+            <div id="errorBox" class="error-box">
+                <div class="error-box-header">
+                    <span>⚠️</span>
+                    <span>Error occurred</span>
+                </div>
+                <div class="error-box-content" id="errorContent"></div>
+            </div>
+
+            <div id="filesSection" class="files-section" style="display: none;">
+                <div class="files-title">
+                    <span>📦</span>
+                    Generated Files
+                </div>
+                <div class="files-grid" id="filesGrid"></div>
+            </div>
+
+            <div style="margin-top: 24px; text-align: right;">
+                <button class="btn-refresh" onclick="checkStatus()">
+                    <span>↻</span>
+                    Refresh Status
+                </button>
+            </div>
         </div>
-        
-        <div class="form-group">
-            <label for="image">Image (optional)</label>
-            <input type="file" id="image" name="image" accept="image/png,image/jpeg,image/webp">
-            <p class="help-text">Upload an image to include in the analysis (PNG, JPG, or WebP)</p>
-        </div>
-        
-        <div class="form-group">
-            <label for="context_text">Large Context (optional)</label>
-            <textarea 
-                id="context_text" 
-                name="context_text" 
-                rows="6" 
-                placeholder="Paste any additional context or large text here..."
-            ></textarea>
-            <p class="help-text">Large texts will be automatically chunked and summarized</p>
-        </div>
-        
-        <button type="submit" id="submitBtn">Run Research</button>
-    </form>
-    
-    <div id="statusPanel" class="status-panel">
-        <h3>Job Status</h3>
-        <p><strong>Job ID:</strong> <span id="jobId"></span></p>
-        <p><strong>Status:</strong> <span id="jobStatus" class="status"></span><span id="spinner" class="spinner" style="display:none;"></span></p>
-        <div id="errorContainer" style="display:none;">
-            <div class="error-message" id="errorMessage"></div>
-        </div>
-        <div id="filesContainer" class="files-list" style="display:none;">
-            <strong>Download Files:</strong>
-            <div id="fileLinks"></div>
-        </div>
-        <button id="checkStatusBtn" onclick="checkStatus()" style="margin-top: 15px;">Refresh Status</button>
+
+        <footer>
+            Built with FastAPI, OpenAI & Wikipedia API • 
+            <a href="https://github.com/Chouaib6801/agentic-app-bonus" target="_blank">View on GitHub</a>
+        </footer>
     </div>
-    
+
     <script>
         let currentJobId = null;
         let statusInterval = null;
-        
+
+        // File input handling
+        const fileInput = document.getElementById('image');
+        const fileWrapper = document.getElementById('fileWrapper');
+        const fileTitle = document.getElementById('fileTitle');
+        const fileSubtitle = document.getElementById('fileSubtitle');
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                fileWrapper.classList.add('has-file');
+                fileTitle.innerHTML = `<span class="file-name">${file.name}</span>`;
+                fileSubtitle.textContent = formatFileSize(file.size);
+            } else {
+                fileWrapper.classList.remove('has-file');
+                fileTitle.textContent = 'Drop an image or click to browse';
+                fileSubtitle.textContent = 'PNG, JPG or WebP • Max 10MB';
+            }
+        });
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        // Form submission
         document.getElementById('jobForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
+            btnText.textContent = 'Starting...';
+            btnIcon.innerHTML = '<div class="spinner"></div>';
             
             const formData = new FormData();
             formData.append('prompt', document.getElementById('prompt').value);
@@ -239,32 +834,68 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`Server error: ${response.status}`);
                 }
                 
                 const data = await response.json();
                 currentJobId = data.job_id;
                 
-                // Show status panel
-                document.getElementById('statusPanel').classList.add('visible');
-                document.getElementById('jobId').textContent = currentJobId;
-                document.getElementById('jobStatus').textContent = 'queued';
-                document.getElementById('jobStatus').className = 'status queued';
-                document.getElementById('spinner').style.display = 'inline-block';
-                document.getElementById('errorContainer').style.display = 'none';
-                document.getElementById('filesContainer').style.display = 'none';
-                
-                // Start polling for status
+                showStatusPanel();
                 startStatusPolling();
                 
             } catch (error) {
-                alert('Error submitting job: ' + error.message);
+                alert('Error: ' + error.message);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Run Research';
+                btnText.textContent = 'Start Research';
+                btnIcon.textContent = '→';
             }
         });
-        
+
+        function showStatusPanel() {
+            const panel = document.getElementById('statusPanel');
+            panel.classList.add('visible');
+            document.getElementById('jobIdDisplay').textContent = currentJobId;
+            updateStatus('queued');
+            document.getElementById('filesSection').style.display = 'none';
+            document.getElementById('errorBox').classList.remove('visible');
+            
+            // Scroll to panel
+            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function updateStatus(status) {
+            const badge = document.getElementById('statusBadge');
+            const text = document.getElementById('statusText');
+            
+            badge.className = 'status-badge ' + status;
+            text.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            
+            // Update progress steps
+            const steps = ['step1', 'step2', 'step3', 'step4'];
+            steps.forEach((id, index) => {
+                const step = document.getElementById(id);
+                step.className = 'progress-step';
+                step.innerHTML = '';
+            });
+            
+            if (status === 'queued') {
+                document.getElementById('step1').classList.add('active');
+                document.getElementById('step1').innerHTML = '<div class="fill"></div>';
+            } else if (status === 'started') {
+                document.getElementById('step1').classList.add('completed');
+                document.getElementById('step2').classList.add('active');
+                document.getElementById('step2').innerHTML = '<div class="fill"></div>';
+                document.getElementById('step3').classList.add('active');
+                document.getElementById('step3').innerHTML = '<div class="fill"></div>';
+            } else if (status === 'finished') {
+                steps.forEach(id => document.getElementById(id).classList.add('completed'));
+            } else if (status === 'failed') {
+                document.getElementById('step1').classList.add('completed');
+                document.getElementById('step2').classList.add('completed');
+            }
+        }
+
         async function checkStatus() {
             if (!currentJobId) return;
             
@@ -272,51 +903,78 @@
                 const response = await fetch(`/jobs/${currentJobId}`);
                 const data = await response.json();
                 
-                document.getElementById('jobStatus').textContent = data.status;
-                document.getElementById('jobStatus').className = 'status ' + data.status;
+                updateStatus(data.status);
                 
                 if (data.status === 'finished') {
-                    document.getElementById('spinner').style.display = 'none';
                     stopStatusPolling();
-                    
-                    if (data.files && data.download_urls) {
-                        const fileLinks = document.getElementById('fileLinks');
-                        fileLinks.innerHTML = '';
-                        data.files.forEach(file => {
-                            const link = document.createElement('a');
-                            link.href = data.download_urls[file];
-                            link.textContent = file;
-                            link.target = '_blank';
-                            fileLinks.appendChild(link);
-                        });
-                        document.getElementById('filesContainer').style.display = 'block';
-                    }
+                    showFiles(data.files, data.download_urls);
                 } else if (data.status === 'failed') {
-                    document.getElementById('spinner').style.display = 'none';
                     stopStatusPolling();
-                    
-                    if (data.error) {
-                        document.getElementById('errorMessage').textContent = data.error;
-                        document.getElementById('errorContainer').style.display = 'block';
-                    }
+                    showError(data.error || 'Unknown error occurred');
                 }
             } catch (error) {
-                console.error('Error checking status:', error);
+                console.error('Status check failed:', error);
             }
         }
-        
+
+        function showFiles(files, urls) {
+            const section = document.getElementById('filesSection');
+            const grid = document.getElementById('filesGrid');
+            
+            grid.innerHTML = '';
+            
+            const fileInfo = {
+                'report.md': { icon: '📝', label: 'Markdown Report', class: 'md' },
+                'report.pdf': { icon: '📕', label: 'PDF Report', class: 'pdf' },
+                'sources.json': { icon: '📋', label: 'Sources Data', class: 'json' }
+            };
+            
+            files.forEach(file => {
+                const info = fileInfo[file] || { icon: '📄', label: file, class: 'md' };
+                const url = urls[file];
+                
+                const card = document.createElement('a');
+                card.href = url;
+                card.target = '_blank';
+                card.className = 'file-card';
+                card.innerHTML = `
+                    <div class="file-card-icon ${info.class}">${info.icon}</div>
+                    <div class="file-card-info">
+                        <h4>${file}</h4>
+                        <span>${info.label}</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            section.style.display = 'block';
+        }
+
+        function showError(message) {
+            const errorBox = document.getElementById('errorBox');
+            document.getElementById('errorContent').textContent = message;
+            errorBox.classList.add('visible');
+        }
+
         function startStatusPolling() {
             stopStatusPolling();
+            checkStatus();
             statusInterval = setInterval(checkStatus, 2000);
         }
-        
+
         function stopStatusPolling() {
             if (statusInterval) {
                 clearInterval(statusInterval);
                 statusInterval = null;
             }
         }
+
+        // Keyboard shortcut: Ctrl+Enter to submit
+        document.getElementById('prompt').addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                document.getElementById('jobForm').dispatchEvent(new Event('submit'));
+            }
+        });
     </script>
 </body>
 </html>
-
